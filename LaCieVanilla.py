@@ -54,36 +54,52 @@ if ssh_key=="""Your keys here
 	os.spawnv(os.P_WAIT,KEYGEN,argv)
 	ssh_key = open("id_dsa.pub",'rb').read()
 
+filesToAdd = {}
+
+filesToAdd["authorized_keys"] = {}
+filesToAdd["authorized_keys"]["string"] = ssh_key
+filesToAdd["authorized_keys"]["len"] = len(ssh_key)
+filesToAdd["authorized_keys"]["path"] = "root/.ssh/"
+filesToAdd["authorized_keys"]["perms"] = int(0600)
+
 sshkeys = {}
 sshkeys['rsa1']="ssh_host_key"
 sshkeys['rsa']="ssh_host_rsa_key"
 sshkeys['dsa']="ssh_host_dsa_key"
 
+
 for keyType in sshkeys.keys():
 	argv = [KEYGEN,'-q','-t'+keyType,'-f'+sshkeys[keyType],'-C','','-N','']
 	os.spawnv(os.P_WAIT,KEYGEN,argv)
-	sshkeys[keyType + "file"] = open(sshkeys[keyType],'rb').read()
-	sshkeys[keyType + "pubfile"] = open(sshkeys[keyType] + ".pub",'rb').read()
+
+	filesToAdd[sshkeys[keyType]] = {}
+	filesToAdd[sshkeys[keyType]]["string"] = open(sshkeys[keyType],'rb').read()
+	filesToAdd[sshkeys[keyType]]["len"] = len(filesToAdd[sshkeys[keyType]]["string"])
+	filesToAdd[sshkeys[keyType]]["path"] = "etc/ssh/"
+	filesToAdd[sshkeys[keyType]]["perms"] = int(0600)
+
+	filesToAdd[sshkeys[keyType] + ".pub"] = {}
+	filesToAdd[sshkeys[keyType] + ".pub"]["string"] = open(sshkeys[keyType] + ".pub",'rb').read()
+	filesToAdd[sshkeys[keyType] + ".pub"]["len"] = len(filesToAdd[sshkeys[keyType] + ".pub"]["string"])
+	filesToAdd[sshkeys[keyType] + ".pub"]["path"] = "etc/ssh/"
+	filesToAdd[sshkeys[keyType] + ".pub"]["perms"] = int(0600)
+
 	os.remove(sshkeys[keyType])
 	os.remove(sshkeys[keyType] + ".pub")
-	#key is int(600), pub is int(0644)
-print sshkeys
-print ssh_key
-sys.exit()
 
-sshdi="""#!/sbin/itype
-# This is a i file, used by initng parsed by install_service
+pathOfFilesToReadIn = {
+		"moduli":"etc/ssh/",
+		"ssh_config":"etc/ssh/",
+		"sshd_config":"etc/ssh/",
+		"sshd.i":"etc/initng/"
+		}
 
-
-daemon sshd {
- require_network;
- need = sshd/generate_keys;
- exec daemon = /usr/sbin/sshd;
- pid_file = /var/run/sshd.pid;
- forks;
- daemon_stops_badly;
-}
-"""
+for file in pathOfFilesToReadIn.keys():
+	filesToAdd[file] = {}
+	filesToAdd[file]["string"] = open(file,'rb').read()
+	filesToAdd[file]["len"] = len(filesToAdd[file]["string"])
+	filesToAdd[file]["path"] = pathOfFilesToReadIn[file]
+	filesToAdd[file]["perms"] = int(0644)
 
 def compress_compatible(data):
 	c = pylzma.compressfile(StringIO(data))
@@ -147,16 +163,12 @@ for tarinfo in captar:
 		rootfsTarFH.close()
 		rootfstarA = tarfile.open("rootFS.orig.tar",'a')
 		rootfstarA.addfile(tarinfoNew, StringIO(defaultRunLevel))
-		# Add sshd.i
-		tarinfoNew.size = len(sshdi)
-		tarinfoNew.name = "etc/initng/sshd.i"
-		tarinfoNew.mode = 436
-		rootfstarA.addfile(tarinfoNew, StringIO(sshdi))
-		# Add authorized_keys
-		tarinfoNew.size = len(ssh_key)
-		tarinfoNew.name = "root/.ssh/authorized_keys"
-		tarinfoNew.mode = 384
-		rootfstarA.addfile(tarinfoNew, StringIO(ssh_key))
+		for file in filesToAdd.keys():
+			print "Adding " + file
+			tarinfoNew.size = filesToAdd[file]["length"]
+			tarinfoNew.name = filesToAdd[file]["path"] + file
+			tarinfoNew.perms = filesToAdd[file]["perms"]
+			rootfstarA.addfile(tarinfoNew, StringIO(filesToAdd[file]["string"]))
 		rootfstarA.close()
 		rootfstarR = open("rootFS.orig.tar",'r')
 		rootfstarString = rootfstarR.read()
