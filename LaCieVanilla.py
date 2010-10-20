@@ -82,7 +82,7 @@ for keyType in sshkeys.keys():
 	filesToAdd[sshkeys[keyType] + ".pub"]["string"] = open(sshkeys[keyType] + ".pub",'rb').read()
 	filesToAdd[sshkeys[keyType] + ".pub"]["len"] = len(filesToAdd[sshkeys[keyType] + ".pub"]["string"])
 	filesToAdd[sshkeys[keyType] + ".pub"]["path"] = "etc/ssh/"
-	filesToAdd[sshkeys[keyType] + ".pub"]["perms"] = int(0600)
+	filesToAdd[sshkeys[keyType] + ".pub"]["perms"] = int(0644)
 
 	os.remove(sshkeys[keyType])
 	os.remove(sshkeys[keyType] + ".pub")
