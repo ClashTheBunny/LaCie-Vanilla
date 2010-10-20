@@ -13,3 +13,5 @@
    limitations under the License.
 
 This is a python script that opens up the LaCie Capsule for a Network Space 2 and produces a capsule that has SSH enabled.
+
+Requires: pylzma
