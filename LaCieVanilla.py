@@ -6,7 +6,22 @@ import sys, os, re
 import hashlib
 import struct
 
-ssh_key="YOUR KEY HERE"
+# set this if you don't have a ~/.ssh/id_[dr]sa.pub
+ssh_key="""Your keys here
+"""
+
+
+try:
+	keyfh = open(os.path.expanduser("~/.ssh/id_dsa.pub"),'rb')
+except:
+	try:
+		keyfh = open(os.path.expanduser("~/.ssh/id_rsa.pub"),'rb')
+	except:
+		pass
+	else:
+		ssh_key=keyfh.read()
+else:
+	ssh_key=keyfh.read()
 
 sshdi="""#!/sbin/itype
 # This is a i file, used by initng parsed by install_service
