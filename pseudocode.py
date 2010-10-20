@@ -6,6 +6,8 @@ import sys, os, re
 import hashlib
 import struct
 
+ssh_key="YOUR KEY HERE"
+
 sshdi="""#!/sbin/itype
 # This is a i file, used by initng parsed by install_service
 
@@ -34,17 +36,9 @@ service sshd/generate_keys {
  }
 }
 
-service sshd/addkey {
- script start = {
-  mkdir -p /root/.ssh
-  echo "YOUR SSH KEY" > /root/.ssh/authorized_keys
-  chmod 600 /root/.ssh/authorized_keys
- }
-}
-
 daemon sshd {
  require_network;
- need = sshd/generate_keys sshd/addkey;
+ need = sshd/generate_keys;
  exec daemon = /usr/sbin/sshd;
  pid_file = /var/run/sshd.pid;
  forks;
@@ -114,10 +108,16 @@ for tarinfo in captar:
 		rootfsTarFH.close()
 		rootfstarA = tarfile.open("rootFS.orig.tar",'a')
 		rootfstarA.addfile(tarinfoNew, StringIO(defaultRunLevel))
+		# Add sshd.i
 		tarinfoNew.size = len(sshdi)
 		tarinfoNew.name = "etc/initng/sshd.i"
 		tarinfoNew.mode = 436
 		rootfstarA.addfile(tarinfoNew, StringIO(sshdi))
+		# Add authorized_keys
+		tarinfoNew.size = len(ssh_key)
+		tarinfoNew.name = "root/.ssh/authorized_keys"
+		tarinfoNew.mode = 384
+		rootfstarA.addfile(tarinfoNew, StringIO(ssh_key))
 		rootfstarA.close()
 		rootfstarR = open("rootFS.orig.tar",'r')
 		rootfstarString = rootfstarR.read()
