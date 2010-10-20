@@ -112,7 +112,7 @@ captar = tarfile.open(fileobj=StringIO(capsuleFileTar))
 captar.extractall()
 for tarinfo in captar:
 	#print tarinfo.name, "is", tarinfo.size
-	if tarinfo.name == "repository/rootfs.tar.lzma":
+	if tarinfo.name == "repository/rootfs.tar.lzma" or tarinfo.name == "repository/rootfs.tar.xz":
 		rootfslzma = captar.extractfile(tarinfo)
 
 		sha1hl = hashlib.sha1()
