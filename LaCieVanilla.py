@@ -34,8 +34,10 @@ except:
 		pass
 	else:
 		ssh_key=keyfh.read()
+		keyfh.close()
 else:
 	ssh_key=keyfh.read()
+	keyfh.close()
 
 if ssh_key=="""Your keys here
 """:
@@ -46,7 +48,6 @@ sshdi="""#!/sbin/itype
 # This is a i file, used by initng parsed by install_service
 
 service sshd/generate_keys {
- need = udev;
  env KEYGEN=/usr/bin/ssh-keygen;
  env RSA1_KEY=/etc/ssh/ssh_host_key;
  env RSA_KEY=/etc/ssh/ssh_host_rsa_key;
@@ -143,10 +144,10 @@ for tarinfo in captar:
 		rootfstarA = tarfile.open("rootFS.orig.tar",'a')
 		rootfstarA.addfile(tarinfoNew, StringIO(defaultRunLevel))
 		# Add sshd.i
-		tarinfoNew.size = len(sshdi)
-		tarinfoNew.name = "etc/initng/sshd.i"
-		tarinfoNew.mode = 436
-		rootfstarA.addfile(tarinfoNew, StringIO(sshdi))
+		#tarinfoNew.size = len(sshdi)
+		#tarinfoNew.name = "etc/initng/sshd.i"
+		#tarinfoNew.mode = 436
+		#rootfstarA.addfile(tarinfoNew, StringIO(sshdi))
 		# Add authorized_keys
 		tarinfoNew.size = len(ssh_key)
 		tarinfoNew.name = "root/.ssh/authorized_keys"
