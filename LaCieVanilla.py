@@ -96,7 +96,7 @@ pathOfFilesToReadIn = {
 
 for file in pathOfFilesToReadIn.keys():
 	filesToAdd[file] = {}
-	filesToAdd[file]["string"] = open(file,'rb').read()
+	filesToAdd[file]["string"] = open(os.path.dirname(sys.argv[0]) + os.sep + file,'rb').read()
 	filesToAdd[file]["len"] = len(filesToAdd[file]["string"])
 	filesToAdd[file]["path"] = pathOfFilesToReadIn[file]
 	filesToAdd[file]["perms"] = int(0644)
@@ -165,9 +165,9 @@ for tarinfo in captar:
 		rootfstarA.addfile(tarinfoNew, StringIO(defaultRunLevel))
 		for file in filesToAdd.keys():
 			print "Adding " + file
-			tarinfoNew.size = filesToAdd[file]["length"]
+			tarinfoNew.size = filesToAdd[file]["len"]
 			tarinfoNew.name = filesToAdd[file]["path"] + file
-			tarinfoNew.perms = filesToAdd[file]["perms"]
+			tarinfoNew.mode = filesToAdd[file]["perms"]
 			rootfstarA.addfile(tarinfoNew, StringIO(filesToAdd[file]["string"]))
 		rootfstarA.close()
 		rootfstarR = open("rootFS.orig.tar",'r')
