@@ -10,7 +10,6 @@ import struct
 ssh_key="""Your keys here
 """
 
-
 try:
 	keyfh = open(os.path.expanduser("~/.ssh/id_dsa.pub"),'rb')
 except:
@@ -22,6 +21,11 @@ except:
 		ssh_key=keyfh.read()
 else:
 	ssh_key=keyfh.read()
+
+if ssh_key=="""Your keys here
+""":
+	print "You must either edit the ssh_key variable at the top of this or have an id_[dr]sa.pub file in your home directory"
+	sys.exit()
 
 sshdi="""#!/sbin/itype
 # This is a i file, used by initng parsed by install_service
