@@ -25,13 +25,21 @@ import struct
 ssh_key="""Your keys here
 """
 
+KEYGEN="/usr/bin/ssh-keygen"
+
 try:
 	keyfh = open(os.path.expanduser("~/.ssh/id_dsa.pub"),'rb')
 except:
 	try:
 		keyfh = open(os.path.expanduser("~/.ssh/id_rsa.pub"),'rb')
 	except:
-		pass
+		try:
+			keyfh = open("id_dsa.pub",'rb')
+		except:
+			pass
+		else:
+			ssh_key=keyfh.read()
+			keyfh.close()
 	else:
 		ssh_key=keyfh.read()
 		keyfh.close()
@@ -41,35 +49,31 @@ else:
 
 if ssh_key=="""Your keys here
 """:
-	print "You must either edit the ssh_key variable at the top of this or have an id_[dr]sa.pub file in your home directory"
-	sys.exit()
+	print "generating id_dsa and id_dsa.pub"
+	argv = [KEYGEN,'-q','-tdsa','-fid_dsa']
+	os.spawnv(os.P_WAIT,KEYGEN,argv)
+	ssh_key = open("id_dsa.pub",'rb').read()
+
+sshkeys = {}
+sshkeys['rsa1']="ssh_host_key"
+sshkeys['rsa']="ssh_host_rsa_key"
+sshkeys['dsa']="ssh_host_dsa_key"
+
+for keyType in sshkeys.keys():
+	argv = [KEYGEN,'-q','-t'+keyType,'-f'+sshkeys[keyType],'-C','','-N','']
+	os.spawnv(os.P_WAIT,KEYGEN,argv)
+	sshkeys[keyType + "file"] = open(sshkeys[keyType],'rb').read()
+	sshkeys[keyType + "pubfile"] = open(sshkeys[keyType] + ".pub",'rb').read()
+	os.remove(sshkeys[keyType])
+	os.remove(sshkeys[keyType] + ".pub")
+	#key is int(600), pub is int(0644)
+print sshkeys
+print ssh_key
+sys.exit()
 
 sshdi="""#!/sbin/itype
 # This is a i file, used by initng parsed by install_service
 
-service sshd/generate_keys {
- env KEYGEN=/usr/bin/ssh-keygen;
- env RSA1_KEY=/etc/ssh/ssh_host_key;
- env RSA_KEY=/etc/ssh/ssh_host_rsa_key;
- env DSA_KEY=/etc/ssh/ssh_host_dsa_key;
-
- script start = {
-  [ ! -s ${RSA1_KEY} ] && \
-  ${KEYGEN} -q -t rsa1 -f ${RSA1_KEY} -C '' -N '' 2>&1 >/dev/null
-  if [ ! -s ${RSA_KEY} ]
-  then
-  ${KEYGEN} -q -t rsa -f ${RSA_KEY} -C '' -N '' 2>&1 >/dev/null
-  chmod 600 ${RSA_KEY}
-  chmod 644 ${RSA_KEY}.pub
-  fi
-  if [ ! -s ${DSA_KEY} ]
-  then
-  ${KEYGEN} -q -t dsa -f ${DSA_KEY} -C '' -N '' 2>&1 >/dev/null
-  chmod 600 ${DSA_KEY}
-  chmod 644 ${DSA_KEY}.pub
-  fi
- }
-}
 
 daemon sshd {
  require_network;
@@ -144,10 +148,10 @@ for tarinfo in captar:
 		rootfstarA = tarfile.open("rootFS.orig.tar",'a')
 		rootfstarA.addfile(tarinfoNew, StringIO(defaultRunLevel))
 		# Add sshd.i
-		#tarinfoNew.size = len(sshdi)
-		#tarinfoNew.name = "etc/initng/sshd.i"
-		#tarinfoNew.mode = 436
-		#rootfstarA.addfile(tarinfoNew, StringIO(sshdi))
+		tarinfoNew.size = len(sshdi)
+		tarinfoNew.name = "etc/initng/sshd.i"
+		tarinfoNew.mode = 436
+		rootfstarA.addfile(tarinfoNew, StringIO(sshdi))
 		# Add authorized_keys
 		tarinfoNew.size = len(ssh_key)
 		tarinfoNew.name = "root/.ssh/authorized_keys"
