@@ -110,11 +110,11 @@ def compress_compatible(data):
 	# compressed data
 	return result + c.read()
 
-file=sys.argv[1]
-print "Editing %s!" % file
+capfile=sys.argv[1]
+print "Editing %s!" % capfile
 
 #read entire file in
-fh = open(file,'rb')
+fh = open(capfile,'rb')
 capsule = fh.read()
 fh.close()
 #find first <\/Capsule>\n and split on that
@@ -223,7 +223,7 @@ descshaTI.size = len(descSha1NewStr)
 captarNew.addfile(descshaTI,StringIO(descSha1NewStr))
 captarNew.close()
 
-newcapsuleFH = open(re.sub("1.2.6","1.2.7",file),'wb')
+newcapsuleFH = open(re.sub("1.2.6","1.2.7",capfile),'wb')
 newcapsuleFH.write(descxmlStrNew)
 newcapsuleFH.write(open(newTarFile,'rb').read())
 newcapsuleFH.close()
