@@ -193,6 +193,7 @@ for tarinfo in captar:
 		descshaTI = tarinfo
 		descshaStr = descsha.read()
 	elif tarinfo.name[:len("repository/post_")] == "repository/post_" and postScriptUpdated == False:
+		print "updating post script"
 		postScriptUpdated = True
 		postScript = captar.extractfile(tarinfo).read()
 		postScript += "\n" + open(os.path.dirname(sys.argv[0]) + os.sep + "additionTopost.sh",'rb').read()
