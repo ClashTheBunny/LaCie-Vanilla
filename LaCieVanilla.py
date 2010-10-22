@@ -210,6 +210,7 @@ descSha1Old.update(descxmlStr)
 descSha1OldStr = descSha1Old.hexdigest()
 print "Old Desc.sha1:", descSha1OldStr
 descxmlStrNew = re.sub(oldLZMAsha1,newLZMAsha1,descxmlStr)
+descxmlStrNew = re.sub("1.2.6","1.2.7",descxmlStr)
 descxmlTI.size = len(descxmlStrNew)
 captarNew.addfile(descxmlTI,StringIO(descxmlStrNew))
 descSha1New = hashlib.sha1()
