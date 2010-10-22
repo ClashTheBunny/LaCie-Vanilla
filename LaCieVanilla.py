@@ -147,6 +147,7 @@ for tarinfo in captar:
 		rootfslzma.read(8)
 		contents += rootfslzma.read()
 		print "Unlzma'ing the rootfs...",
+		sys.stdout.flush()
 		rootfsTarFH = open("rootFS.orig.tar",'wb')
 		rootfsTarFH.write(pylzma.decompress(contents))
 		rootfsTarFH.close()
@@ -176,6 +177,7 @@ for tarinfo in captar:
 		rootfstarR = open("rootFS.orig.tar",'rb')
 		rootfstarString = rootfstarR.read()
 		print "lzma'ing it back up...",
+		sys.stdout.flush()
 		newLZMA = compress_compatible(rootfstarString)
 		print "Done!"
 		tarinfoNew = tarinfo
