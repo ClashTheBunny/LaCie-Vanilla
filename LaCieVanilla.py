@@ -221,7 +221,7 @@ descshaTI.size = len(descSha1NewStr)
 captarNew.addfile(descshaTI,StringIO(descSha1NewStr))
 captarNew.close()
 
-newcapsuleFH = open("newTarFile.capsule",'wb')
+newcapsuleFH = open(re.sub("1.2.6","1.2.7",file),'wb')
 newcapsuleFH.write(descxmlStrNew)
 newcapsuleFH.write(open(newTarFile,'rb').read())
 newcapsuleFH.close()
