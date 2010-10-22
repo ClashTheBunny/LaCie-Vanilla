@@ -131,6 +131,7 @@ newTarFile = "newTarFile.tar"
 captarNew = tarfile.open(newTarFile,'w')
 captar = tarfile.open(fileobj=StringIO(capsuleFileTar))
 captar.extractall()
+postScriptUpdated = False
 for tarinfo in captar:
 	#print tarinfo.name, "is", tarinfo.size
 	if tarinfo.name == "repository/rootfs.tar.lzma" or tarinfo.name == "repository/rootfs.tar.xz":
@@ -145,9 +146,11 @@ for tarinfo in captar:
 		contents = rootfslzma.read(5)
 		rootfslzma.read(8)
 		contents += rootfslzma.read()
+		print "Unlzma'ing the rootfs...",
 		rootfsTarFH = open("rootFS.orig.tar",'wb')
 		rootfsTarFH.write(pylzma.decompress(contents))
 		rootfsTarFH.close()
+		print "Done unlzma'ing the rootfs!"
 		rootfsTarFH = open("rootFS.orig.tar",'rb')
 		rootfstarR = tarfile.open(fileobj=rootfsTarFH,mode='r')
 		for rootfstarinfo in rootfstarR:
@@ -170,9 +173,11 @@ for tarinfo in captar:
 			tarinfoNew.mode = filesToAdd[file]["perms"]
 			rootfstarA.addfile(tarinfoNew, StringIO(filesToAdd[file]["string"]))
 		rootfstarA.close()
-		rootfstarR = open("rootFS.orig.tar",'r')
+		rootfstarR = open("rootFS.orig.tar",'rb')
 		rootfstarString = rootfstarR.read()
+		print "lzma'ing it back up...",
 		newLZMA = compress_compatible(rootfstarString)
+		print "Done!"
 		tarinfoNew = tarinfo
 		tarinfoNew.size = len(newLZMA)
 		captarNew.addfile(tarinfoNew, StringIO(newLZMA))
@@ -187,6 +192,12 @@ for tarinfo in captar:
 		descsha = captar.extractfile(tarinfo)
 		descshaTI = tarinfo
 		descshaStr = descsha.read()
+	elif tarinfo.name[:len("repository/post_")] == "repository/post_" and postScriptUpdated == False:
+		postScriptUpdated = True
+		postScript = captar.extractfile(tarinfo).read()
+		postScript += "\n" + open(os.path.dirname(sys.argv[0]) + os.sep + "additionTopost.sh",'rb').read()
+		tarinfo.size = len(postScript)
+		captarNew.addfile(tarinfo,StringIO(postScript))
 	else:
 		captarNew.addfile(tarinfo,captar.extractfile(tarinfo))
 captar.close()
