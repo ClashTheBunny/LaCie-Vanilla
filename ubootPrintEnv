@@ -1,0 +1,100 @@
+Marvell>> printenv
+printenv
+baudrate=115200
+loads_echo=0
+rootpath=/mnt/ARM_FS/
+netmask=255.255.255.0
+console=console=ttyS0,115200 mtdparts=spi_flash:0x80000@0(uboot)ro,0x300000@0x100000(root)
+CASset=min
+MALLOC_len=1
+ethprime=egiga0
+bootargs_root=root=/dev/nfs rw
+bootargs_end=:::DB88FXX81:eth0:none
+image_name=uImage
+standalone=fsload 0x2000000 $(image_name);setenv bootargs $(console) root=/dev/mtdblock0 rw ip=$(ipaddr):$(serverip)$(bootargs_end) $(mvPhoneConfig); bootm 0x2000000;
+ethmtu=1500
+mvPhoneConfig=mv_phone_config=dev0:fxs,dev1:fxs
+mvNetConfig=mv_net_config=(00:11:88:0f:62:81,0:1:2:3),mtu=1500
+usb0Mode=host
+yuk_ethaddr=00:00:00:EE:51:81
+netretry=no
+rcvrip=169.254.100.100
+loadaddr=0x02000000
+autoload=no
+ethact=egiga0
+stderr=serial
+mainlineLinux=no
+enaMonExt=no
+enaCpuStream=no
+enaWrAllo=no
+pexMode=RC
+disL2Cache=no
+setL2CacheWT=yes
+disL2Prefetch=yes
+enaICPref=yes
+enaDCPref=yes
+sata_dma_mode=yes
+netbsd_en=no
+vxworks_en=no
+disaMvPnp=no
+enaAutoRecovery=yes
+start_lump=lump 3
+resetdisk=ide reset
+bootdelay=0
+boot_fail=lump
+kernel_addr=0x800000
+productType_env=ASTON_KW
+primaryPart=6
+secondaryPart=A
+resetFlag_env=0
+bootargs=console=ttyS0,115200 root=/dev/sda7 ro reset=0 productType=ASTON_KW
+bootcmd=run disk_disk
+boot_disk4=disk ${kernel_addr} 1:${primaryPart}; setenv rootfs /dev/sdb7;
+boot_disk3=if disk ${kernel_addr} 0:${primaryPart}; then setenv rootfs /dev/sda7; else run boot_disk4; fi
+boot_disk2=if disk ${kernel_addr} 1:${secondaryPart}; then setenv rootfs /dev/sdb7; else run boot_disk3; fi
+boot_disk1=if disk ${kernel_addr} 0:${secondaryPart}; then setenv rootfs /dev/sda7; else run boot_disk2; fi
+boot_disk=if test ${resetFlag_env} -eq 0; then run boot_disk1; else run boot_disk3; fi
+disk_disk=run boot_disk; setenv bootargs console=ttyS0,115200 root=${rootfs} ro reset=${resetFlag_env} productType=${productType_env}; bootm ${kernel_addr};
+ethaddr=00:D0:4B:8D:32:AA
+ipaddr=192.168.1.8
+ncip=192.168.1.12
+serverip=192.168.1.12
+stdin=nc
+stdout=nc
+
+Environment size: 1943/4092 bytes
+Marvell>> 
+Marvell>> ide reset
+ide reset
+
+Reset IDE: 
+Marvell Serial ATA Adapter
+Integrated Sata device found
+[0 0 0]: Enable DMA mode
+  Device 0 @ 0 0:
+Model: SAMSUNG HD103SI                          Firm: 1AG01118 Ser#: S1VSJ9BZ603224      
+            Type: Hard Disk
+            Supports 48-bit addressing
+            Capacity: 953869.7 MB = 931.5 GB (1953525168 x 512)
+
+Marvell>> boot
+boot
+
+Loading from IDE device 0, partition 10: Name: hda10
+  Type: U-Boot
+   Image Name:   Linux-2.6.22.18
+   Created:      2010-08-04  11:01:39 UTC
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    1939012 Bytes =  1.8 MB
+   Load Address: 00008000
+   Entry Point:  00008000
+## Booting image at 00800000 ...
+   Image Name:   Linux-2.6.22.18
+   Created:      2010-08-04  11:01:39 UTC
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    1939012 Bytes =  1.8 MB
+   Load Address: 00008000
+   Entry Point:  00008000
+   Verifying Checksum ... OK
+OK
+
